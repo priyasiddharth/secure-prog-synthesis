@@ -1,0 +1,5 @@
+gelu      eager    : dIr=+0 dBc=+0 -> oblivious
+gelu      compiled : dIr=+0 dBc=+0 -> oblivious
+softmax   eager    : dIr=+0 dBc=+0 -> oblivious
+softmax   compiled : dIr=-573 dBc=-93 -> DISTINGUISHABLE
+EXIT=0

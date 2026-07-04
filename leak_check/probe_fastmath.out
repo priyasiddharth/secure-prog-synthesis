@@ -1,0 +1,9 @@
+Probe 2 — fast-math / FTZ on the denormal leak (branchless x@w)
+
+mode                   normal us   denormal us  slowdown     AUC  strength  verdict
+eager                     6599.0      177321.3     26.87   1.000     1.000  LEAKS
+compiled                  7271.0      178793.9     24.59   1.000     1.000  LEAKS
+compiled_fastmath         6957.8      177482.1     25.51   1.000     1.000  LEAKS
+
+=> Leak in every build -> hardware effect; default Inductor does NOT set FTZ, and even -ffast-math did not here.
+FASTMATH_EXIT=0

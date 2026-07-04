@@ -1,0 +1,19 @@
+Activation differential sweep (eager vs Inductor) | channels: callgrind Ir/Bc + memcheck taint
+
+==========================================================================
+MODEL: relu   classes: neg vs pos
+==========================================================================
+  eager    : oblivious        clean
+  compiled : oblivious        clean
+  VERDICT: OBLIVIOUS
+
+==========================================================================
+MODEL: exp   classes: small vs large
+==========================================================================
+  eager    : DISTINGUISHABLE  dIr=+35061760 dBc=+3416064 taint
+  compiled : oblivious        clean
+  VERDICT: COMPILER-REMOVED
+
+==========================================================================
+MODEL: gelu   classes: small vs large
+==========================================================================

@@ -1,0 +1,30 @@
+corpus DIM=512 | secrets: zero vs random | instruments: callgrind(Ir,Bc) + memcheck(taint)
+
+==============================================================================
+MODEL: branchless   (predicted: oblivious)
+==============================================================================
+  eager    : Ir_zero=     148,524  Ir_rand=     148,524  dIr=          +0  dBc=        +0  taint=clean  -> oblivious
+  compiled : Ir_zero=     314,332  Ir_rand=     314,332  dIr=          +0  dBc=        +0  taint=clean  -> oblivious
+  VERDICT  : OBLIVIOUS  [MATCHES PREDICTION]
+
+==============================================================================
+MODEL: cond_skip   (predicted: authored)
+==============================================================================
+  eager    : Ir_zero=   6,632,618  Ir_rand=   6,446,487  dIr=    -186,131  dBc=    +2,799  taint=TAINT  -> DISTINGUISHABLE
+  compiled : Ir_zero=     485,366  Ir_rand=     564,624  dIr=     +79,258  dBc=    +4,144  taint=TAINT  -> DISTINGUISHABLE
+  VERDICT  : AUTHORED  [MATCHES PREDICTION]
+
+==============================================================================
+MODEL: where_select   (predicted: oblivious)
+==============================================================================
+  eager    : Ir_zero=     299,075  Ir_rand=     299,339  dIr=        +264  dBc=        +0  taint=TAINT  -> DISTINGUISHABLE
+  compiled : Ir_zero=     455,881  Ir_rand=     455,881  dIr=          +0  dBc=        +0  taint=clean  -> oblivious
+  VERDICT  : COMPILER-REMOVED  [!! predicted oblivious !!]
+
+==============================================================================
+SUMMARY
+==============================================================================
+  [ok ] branchless     verdict=oblivious              predicted=oblivious
+  [ok ] cond_skip      verdict=authored               predicted=authored
+  [DIFF] where_select   verdict=compiler-removed       predicted=oblivious
+EXIT=0

@@ -1,0 +1,8 @@
+Probe 1 — max-autotune compile-time kernel selection vs secret
+
+  zero   : compiled kernel median-on-w0 = 267.68 us
+  random : compiled kernel median-on-w0 = 300.58 us
+  generated code identical (normalized): True
+  timing-on-w0 AUC(zero-compile vs random-compile) = 0.684 (0.5 = same kernel)
+
+=> NO compile-time leak: max-autotune selected the SAME kernel regardless of the secret present at compile time (value-independent).

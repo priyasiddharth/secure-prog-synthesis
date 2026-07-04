@@ -1,0 +1,63 @@
+Compiling ...
+
+LEAK MATRIX (L = distinguishable, . = oblivious)
+
+kernel          g:O0  g:O2  g:O3  g:O3-native  g:Ofast-native  c:O0  c:O2  c:O3  c:O3-native  c:Ofast-native
+matmul              .      .      .             .                .      .      .      .             .                .
+relu                L      L      .             .                .      L      .      .             .                .
+select_branch       L      L      L             L                L      L      L      L             .                .
+select_ct           .      .      .             .                .      .      .      .             .                .
+memeq               L      L      L             L                L      L      L      L             L                L
+
+DETAIL (dIr/dBc/dDw across classes; taint = control-flow dependence)
+  matmul          gcc   O0             obliv  clean                     Dw=132104
+  matmul          gcc   O2             obliv  clean                     Dw=258
+  matmul          gcc   O3             obliv  clean                     Dw=265
+  matmul          gcc   O3-native      obliv  clean                     Dw=265
+  matmul          gcc   Ofast-native   obliv  clean                     Dw=265
+  matmul          clang O0             obliv  clean                     Dw=132105
+  matmul          clang O2             obliv  clean                     Dw=262
+  matmul          clang O3             obliv  clean                     Dw=262
+  matmul          clang O3-native      obliv  clean                     Dw=263
+  matmul          clang Ofast-native   obliv  clean                     Dw=259
+  relu            gcc   O0             LEAK   dIr=+20480 taint          Dw=8199
+  relu            gcc   O2             LEAK   dIr=-4096 taint           Dw=4098
+  relu            gcc   O3             obliv  clean                     Dw=1026
+  relu            gcc   O3-native      obliv  clean                     Dw=514
+  relu            gcc   Ofast-native   obliv  clean                     Dw=514
+  relu            clang O0             LEAK   dIr=+12288 taint          Dw=8200
+  relu            clang O2             obliv  clean                     Dw=1026
+  relu            clang O3             obliv  clean                     Dw=1026
+  relu            clang O3-native      obliv  clean                     Dw=514
+  relu            clang Ofast-native   obliv  clean                     Dw=514
+  select_branch   gcc   O0             LEAK   dIr=+4096 taint           Dw=8201
+  select_branch   gcc   O2             LEAK   taint                     Dw=4098
+  select_branch   gcc   O3             LEAK   taint                     Dw=4098
+  select_branch   gcc   O3-native      LEAK   taint                     Dw=516
+  select_branch   gcc   Ofast-native   LEAK   taint                     Dw=516
+  select_branch   clang O0             LEAK   dIr=+4096 taint           Dw=8202
+  select_branch   clang O2             LEAK   dIr=+6144 taint           Dw=4098
+  select_branch   clang O3             LEAK   dIr=+6144 taint           Dw=4098
+  select_branch   clang O3-native      obliv  clean                     Dw=1029
+  select_branch   clang Ofast-native   obliv  clean                     Dw=1029
+  select_ct       gcc   O0             obliv  clean                     Dw=12297
+  select_ct       gcc   O2             obliv  clean                     Dw=4098
+  select_ct       gcc   O3             obliv  clean                     Dw=1027
+  select_ct       gcc   O3-native      obliv  clean                     Dw=517
+  select_ct       gcc   Ofast-native   obliv  clean                     Dw=517
+  select_ct       clang O0             obliv  clean                     Dw=12298
+  select_ct       clang O2             obliv  clean                     Dw=1029
+  select_ct       clang O3             obliv  clean                     Dw=1029
+  select_ct       clang O3-native      obliv  clean                     Dw=517
+  select_ct       clang Ofast-native   obliv  clean                     Dw=517
+  memeq           gcc   O0             LEAK   dIr=+57330 dBc=+8190 taint  Dw=8
+  memeq           gcc   O2             LEAK   dIr=+24570 dBc=+8190 taint  Dw=2
+  memeq           gcc   O3             LEAK   dIr=+24570 dBc=+8190 taint  Dw=2
+  memeq           gcc   O3-native      LEAK   dIr=+24570 dBc=+8190 taint  Dw=2
+  memeq           gcc   Ofast-native   LEAK   dIr=+24570 dBc=+8190 taint  Dw=2
+  memeq           clang O0             LEAK   dIr=+65520 dBc=+8190 taint  Dw=10
+  memeq           clang O2             LEAK   dIr=+28670 dBc=+8190 taint  Dw=2
+  memeq           clang O3             LEAK   dIr=+28670 dBc=+8190 taint  Dw=2
+  memeq           clang O3-native      LEAK   dIr=+28670 dBc=+8190 taint  Dw=2
+  memeq           clang Ofast-native   LEAK   dIr=+28670 dBc=+8190 taint  Dw=2
+EXIT=0

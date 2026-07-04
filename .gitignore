@@ -1,0 +1,16 @@
+# generated / regenerable artifacts
+__pycache__/
+*.pyc
+*.so
+*.o
+*.pt2
+*.npy
+leak_check/secrets/
+leak_check/ctbench/secrets/
+leak_check/ctbench/build/
+# transient logs / scratch
+*.err
+dbg.*
+e.txt
+.valgrind_install.log
+err.txt

@@ -1,0 +1,44 @@
+threads = 1 | iters = 800 | warmup = 50 | dim = 4096
+
+========================================================================
+CONTROL: Branchless (always x @ w, no data-dependent control flow)
+========================================================================
+  Eager (backend=aten)
+    zero   : median   5666.9 us   IQR   615.2 us
+    random : median   5621.3 us   IQR   558.0 us
+    attacker AUC = 0.473  (leakage strength 0.054)   MWU p = 6.2e-02
+  Compiled (backend=inductor)
+    zero   : median   5921.5 us   IQR   689.1 us
+    random : median   5966.9 us   IQR   597.5 us
+    attacker AUC = 0.546  (leakage strength 0.093)   MWU p = 1.3e-03
+
+========================================================================
+AUTHORED BRANCH: skip matmul when weights==0, via torch.cond
+========================================================================
+  Eager (backend=aten)
+    zero   : median  93814.1 us   IQR  9118.2 us
+    random : median 109947.9 us   IQR 11778.2 us
+    attacker AUC = 0.901  (leakage strength 0.802)   MWU p = 8.1e-170
+  Compiled (backend=inductor)
+    zero   : median   7267.6 us   IQR   884.6 us
+    random : median  13070.7 us   IQR  1225.3 us
+    attacker AUC = 0.999  (leakage strength 0.998)   MWU p = 1.3e-261
+
+========================================================================
+VERDICTS  (leakage strength = |attacker_AUC - 0.5| * 2; 0 = oblivious, 1 = perfect leak)
+========================================================================
+[Branchless / control]
+    eager    leakage strength = 0.054  -> no detectable leak
+    compiled leakage strength = 0.093  -> no detectable leak
+    => No detectable value-dependent timing in either mode.
+
+[Authored branch (torch.cond)]
+    eager    leakage strength = 0.802  -> LEAKS
+    compiled leakage strength = 0.998  -> LEAKS
+    => Leak present in BOTH -> AUTHORED (algorithmic), not compiler-introduced.
+
+Interpretation guide:
+  * Large-N Mann-Whitney p-values will often be < 0.05 even when the
+    effect is negligible -- trust the AUC/leakage strength, not p.
+  * A null result means 'not detectable with this harness', not
+    'provably constant-time'. CPU wall-clock timing has a noise floor.
