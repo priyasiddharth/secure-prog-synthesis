@@ -96,6 +96,14 @@ class EarlyExitEnclave:
         return will_exit, n_layers_run, latency
 
     @torch.no_grad()
+    def gate_logit(self, x_last_np):
+        """Raw secret-gate logit ``gate(h)`` at the exit point (the confidence a
+        logit-returning API would expose). Sign > 0 means early exit."""
+        x = self._build_embedding(x_last_np)
+        x = self._run_blocks(x, 0, self.exit_after_layer)
+        return float(self.exit_gate(x[0, -1, :]).item())
+
+    @torch.no_grad()
     def true_decision(self, x_last_np):
         """Ground-truth gate label (1 = early exit). Evaluation only -- not part
         of the attacker's view."""

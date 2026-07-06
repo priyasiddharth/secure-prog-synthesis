@@ -10,15 +10,21 @@ Two presets:
 from dataclasses import dataclass, field
 from typing import Callable
 
-from sklearn.linear_model import LogisticRegression
+from sklearn.linear_model import LinearRegression, LogisticRegression
 
 from .model import GPTConfig
 
 
 def _default_surrogate():
-    # The attacker's model class. Injected (not hard-coded in the attack) so a
-    # different hypothesis class can be swapped in without touching the algorithm.
+    # The attacker's model class for the label-only attack. Injected (not
+    # hard-coded in the attack) so a different hypothesis class can be swapped in
+    # without touching the algorithm.
     return LogisticRegression(max_iter=2000)
+
+
+def _default_regressor():
+    # The hypothesis class for the logit-based attack: fit the confidence surface.
+    return LinearRegression()
 
 
 @dataclass
@@ -43,7 +49,14 @@ class AttackConfig:
     oracle_reps: int = 1
 
     seed: int = 1
-    surrogate_factory: Callable = field(default=_default_surrogate)
+    surrogate_factory: Callable = field(default=_default_surrogate)   # label attack
+    regressor_factory: Callable = field(default=_default_regressor)   # logit attack (linear)
+
+    # MLP logit attack (nonlinear surrogate + Jacobian active learning)
+    mlp_hidden: tuple = (64,)
+    mlp_epochs: int = 400
+    mlp_lr: float = 1e-2
+    mlp_weight_decay: float = 1e-3
 
     @classmethod
     def preset(cls, mode: str) -> "AttackConfig":

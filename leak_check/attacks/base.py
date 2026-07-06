@@ -20,9 +20,15 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import Any, Protocol, runtime_checkable
+from typing import Any, Callable, Protocol, runtime_checkable
 
 import numpy as np
+
+# What an attack learns from: a query point -> one scalar observation. Both
+# ``Oracle.query`` (a continuous observable, e.g. a logit) and ``Labeler.label``
+# (a discretized one) satisfy this, so an attack can depend on the narrowest
+# possible interface and let its subtype decide whether to regress or classify.
+Observe = Callable[[np.ndarray], float]
 
 
 @runtime_checkable
@@ -64,15 +70,17 @@ class AttackResult:
 
 class ExtractionAttack(ABC):
     """A secret-extraction attack: learn a surrogate of a target's decision
-    boundary using only label queries.
+    boundary from ``(x, observe(x))`` pairs.
 
-    Depends on ``Labeler`` (which depends on ``Oracle``), never on the target
-    itself -- the inversion of control that lets one attack run against any
-    target satisfying the interface.
+    Depends only on an ``Observe`` callable, never on the target itself -- the
+    inversion of control that lets one attack run against any target satisfying
+    the interface. What the scalar means (a discrete label vs. a continuous
+    confidence/logit) is the subtype's business: a classification attack is fed
+    ``Labeler.label`` and a regression attack is fed ``Oracle.query``.
     """
 
     @abstractmethod
-    def run(self, labeler: Labeler, dim: int, budget: int) -> AttackResult:
-        """Spend at most ``budget`` label queries recovering a ``dim``-dimensional
-        decision boundary."""
+    def run(self, observe: Observe, dim: int, budget: int) -> AttackResult:
+        """Spend at most ``budget`` queries recovering a ``dim``-dimensional
+        decision boundary, reading one scalar per query via ``observe``."""
         ...

@@ -1,19 +1,25 @@
 """
 The attacker's view of the enclave, and how a raw observable becomes a label.
 
-Two oracles implement the ``base.Oracle`` protocol over the same enclave:
+Three oracles implement the ``base.Oracle`` protocol over the same enclave; they
+differ in threat model and in how much they reveal per query:
 
-  TimingOracle      the realistic channel -- median wall-clock latency of the
+  TimingOracle      the realistic side channel -- median wall-clock latency of the
                     forward pass. Noisy, but exactly what a remote attacker
-                    measures through an API.
+                    measures through an API. Reveals ~one bit (fast vs. slow).
   LayerCountOracle  a noise-free control -- the number of blocks executed, read
                     off directly. Not available to a real attacker; it isolates
                     the attack algorithm from timing noise so a failure can be
                     attributed (algorithm vs. measurement). Mirrors the detector
-                    side's "branchless control".
+                    side's "branchless control". Also ~one bit.
+  LogitOracle       a stronger, direct threat model -- the API returns the gate's
+                    confidence (the raw logit ``gate(h)``), not just the decision.
+                    Reveals the signed distance to the boundary, which is what the
+                    logit-based extraction attack (arXiv:1907.00713) exploits.
 
-ThresholdLabeler turns either observable into the binary early-exit label by
-calibrating a midpoint between a known-fast and known-slow probe.
+ThresholdLabeler turns a (one-bit) observable into the binary early-exit label by
+calibrating a midpoint between a known-fast and known-slow probe. The LogitOracle
+needs no labeler -- its zero crossing is the boundary.
 """
 
 import numpy as np
@@ -39,6 +45,22 @@ class LayerCountOracle:
 
     def query(self, x: np.ndarray) -> float:
         return float(self._enclave.forward(x, measure=False)[1])
+
+
+class LogitOracle:
+    """Observable = the secret gate's raw logit ``gate(h)`` (confidence).
+
+    A stronger threat model than the timing/layer-count channels: the API hands
+    back the continuous decision value instead of one bit. The gate exits iff the
+    logit is positive, so the boundary is the zero crossing -- no calibration
+    needed. This is the signal the logit-based extraction attack regresses.
+    """
+
+    def __init__(self, enclave):
+        self._enclave = enclave
+
+    def query(self, x: np.ndarray) -> float:
+        return self._enclave.gate_logit(x)
 
 
 class ThresholdLabeler:
